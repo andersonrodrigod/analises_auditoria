@@ -1,1 +1,108 @@
 filtrar medico solicitante com "aceitar cancelar?"
+DESEJA CANCELAMENTO E CANCELARIAMOS / SUGERIR QUE /
+DESEJO DO CANCELAMENTO / CTT GRAVADO
+
+🔹 1. Gráfico de pizza / donut
+
+Útil pra mostrar proporção de ações ou procedimentos dentro de cada pessoa (ex: Joyce fez 60% CTT REALIZADO, 20% COBRO, 20% PARECER).
+
+Fica intuitivo quando o objetivo é comparar “distribuição interna”.
+
+🔹 2. Gráfico de linha (com truque)
+
+Você não tem datas estruturadas, mas pode simular uma linha temporal: ordenar pelo número do protocolo ou pela sequência de registros.
+
+Isso permite ver a evolução do volume de ações (mesmo que não seja 100% cronológico).
+
+Exemplo: evolução do número de pareceres feitos por semana/mês.
+
+🔹 3. Heatmap (mapa de calor)
+
+Ótimo pra coocorrências.
+
+Exemplo: linhas = assinaturas, colunas = procedimentos, cor = frequência.
+
+A cor já mostra quem faz o quê com mais intensidade.
+
+🔹 4. Treemap (mapa de retângulos)
+
+Mostra proporções em blocos.
+
+Exemplo: tamanho do bloco = número de procedimentos, cor = tipo de ação.
+
+Bom pra datasets com muitos itens (ex: 50 procedimentos diferentes).
+
+🔹 5. Wordcloud (nuvem de palavras)
+
+Você já está praticamente pronto pra isso, já que extrai frequências de palavras.
+
+Dá pra gerar uma nuvem mostrando quais termos aparecem mais nos textos dos pareceres.
+
+🔹 6. Gráfico de Sankey (fluxo)
+
+Mostra transição entre etapas.
+
+Exemplo: COBRO → PARECER → ANEXO → RESOLVIDO.
+
+Fica legal se você quiser mostrar como uma pendência caminha entre ações.
+
+👉 Resumindo:
+
+Se quiser mostrar quantidade → barra, pizza, treemap.
+
+Se quiser mostrar evolução → linha (mesmo com datas “improvisadas”).
+
+Se quiser mostrar relação → heatmap, sankey, wordcloud.
+
+
+
+
+🔹 Nível 1 — Exploratório básico (mais simples)
+
+Contagem de procedimentos mais frequentes → gráfico de barras com nome_procedimento.
+
+Distribuição de médicos solicitantes → barras ou pizza mostrando quais médicos solicitam mais.
+
+Top palavras em info_medico → gráfico de barras com as palavras mais comuns.
+
+Quantidade de ações por assinatura (JOYCE, RODRIGO, KEISI) → barras comparando quem fez mais.
+
+Top 10 assinaturas → barras horizontais mostrando quais assinam mais.
+
+🔹 Nível 2 — Comparativos diretos
+
+Procedimentos x número médio de COBRO → barras mostrando a média de COBRO por procedimento.
+
+Distribuição de procedimentos por assinatura → barras empilhadas (cada assinatura com seus procedimentos mais feitos).
+
+Top médicos x número de procedimentos solicitados → barras horizontais.
+
+Número de ocorrências de cada ação (COBRO, CTT REALIZADO, EM ANEXO, etc.) → barras.
+
+Proporção de tipos de procedimentos cirúrgicos vs clínicos (se houver classificação) → pizza ou barras.
+
+🔹 Nível 3 — Séries temporais
+
+Volume de registros por dia (data_hora_bot) → linha mostrando crescimento diário.
+
+Ações por assinatura ao longo do tempo → linhas comparando JOYCE, RODRIGO e KEISI.
+
+Quantidade de COBRO por dia → linha/área mostrando tendência.
+
+Procedimentos mais frequentes ao longo do tempo → gráfico de linhas múltiplas.
+
+🔹 Nível 4 — Distribuições avançadas
+
+Boxplot da quantidade de COBRO por procedimento → entender variação.
+
+Heatmap de procedimentos x assinaturas → intensidade de registros.
+
+Mapa de calor de médicos solicitantes x quantidade de procedimentos.
+
+Wordcloud de info_medico → nuvem de palavras para ver termos mais frequentes.
+
+🔹 Nível 5 — Insights complexos
+
+Rede (grafo) de médicos solicitantes x procedimentos → nós representando médicos e procedimentos, arestas representando vínculos.
+
+Rede de assinaturas x ações → grafo mostrando quem faz o quê.

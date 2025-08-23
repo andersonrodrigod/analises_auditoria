@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 
-arquivos = glob.glob("dados/*.xlsx")
+arquivos = glob.glob("data/*.xlsx")
 
 df_list = []
 
