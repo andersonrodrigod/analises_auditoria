@@ -227,3 +227,42 @@ def filter_cancelar(df,column_info="info_assistente", column_info_medico="info_m
 
     return df_cancelar
 
+def _ensure_date_series(s):
+    """Converte para datetime com suporte a dd/mm/yyyy HH:MM e ISO. Retorna somente a data."""
+    return pd.to_datetime(s, dayfirst=True, errors="coerce").dt.date
+
+import pandas as pd
+
+def reconstruir_info(df, col_nome="nome", col_proc="procedimento", col_data="data_hora_bot", col_info="info_medico"):
+    # garantir que a data esteja em formato datetime
+    df[col_data] = pd.to_datetime(df[col_data], errors="coerce")
+
+    resultados = []
+
+    # agrupa por paciente + procedimento
+    for (nome, proc), grupo in df.groupby([col_nome, col_proc]):
+        grupo = grupo.sort_values(col_data).copy()
+
+        historico = []  # vai guardar todas as infos já vistas
+
+        for _, row in grupo.iterrows():
+            partes = [p.strip() for p in row[col_info].split("-")]
+            for parte in partes:
+                if parte not in historico:  # só adiciona se for novo
+                    historico.append(parte)
+
+        # pega a última linha do grupo
+        ultima = grupo.iloc[-1].copy()
+        # substitui info_medico pelo histórico completo
+        ultima[col_info] = " - ".join(historico)
+
+        resultados.append(ultima)
+
+    # retorna dataframe consolidado
+    return pd.DataFrame(resultados)
+
+
+# exemplo de uso:
+
+
+
