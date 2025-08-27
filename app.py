@@ -58,7 +58,7 @@ df_cancelar = filter_cancelar(df, column_info="info_assistente", column_info_med
 #print(df_top_parecer)
 #print(df_top_cobro)
 #bar_plot_top_parecer = bar_plot_top_quantidade_parecer(df_top_parecer)
-bar_plot_top_cobro = bar_plot_top_quantidade_cobro(df_top_cobro)
+#bar_plot_top_cobro = bar_plot_top_quantidade_cobro(df_top_cobro)
 
 #print(df_procedimento_media_dias_resolver_parecer)
 #bar_plot_top_procedimento_media_dias_resolver_parecer = bar_plot_procedimento_media_dias_resolver_parecer(df_procedimento_media_dias_resolver_parecer)
@@ -81,7 +81,7 @@ bar_plot_top_cobro = bar_plot_top_quantidade_cobro(df_top_cobro)
 #bar_plot_top_procedimentos_mais_tempo_resolver_exames_cobro = bar_plot_procedimento_media_dias_cobrar_resolver_exames(df_procedimentos_mais_tempo_resolver_cobro.head(20))
 
 #print(df_procedimentos_mais_tempo_resolver_cobro_min5)
-#bar_blot_top_procedimentos_mais_tempo_resolver_cobro_min5 = bar_plot_procedimento_media_dias_cobrar_resolver_exames_min5(df_procedimentos_mais_tempo_resolver_cobro_min5.head(20))
+bar_blot_top_procedimentos_mais_tempo_resolver_cobro_min5 = bar_plot_procedimento_media_dias_cobrar_resolver_exames_min5(df_procedimentos_mais_tempo_resolver_cobro_min5.head(20))
 
 cateter = filter_by_word(df, "TRANSEPTAL")
 

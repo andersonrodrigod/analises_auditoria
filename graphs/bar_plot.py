@@ -60,7 +60,7 @@ def bar_plot_top_quantidade_parecer(df):
 
     x = "Procedimentos"
     y = "Quantidade_PARECER"
-    title = "Procedimentos Mais Frequentes em Parecer"
+    title = "Procedimentos Mais Frequentes (em Parecer)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
@@ -75,12 +75,10 @@ def bar_plot_top_quantidade_cobro(df):
 
     x = "Procedimentos"
     y = "Quantidade_COBRO"
-    title = "Procedimentos Mais Frequentes em Cobranças"
+    title = "Procedimentos Mais Frequentes (em Cobranças)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
-    ticks = range(len(df[x]))
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(df[x], rotation=45, ha="right")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
 
     ax = edit_bar_plot(ax, title=title, xlabel=x, ylabel="Quantidade", ylim=(0, max(df[y]) * 1.3), xticks=True, offset=0.7)
     plt.subplots_adjust(bottom=0.25)
@@ -92,12 +90,10 @@ def bar_plot_procedimento_media_dias_resolver_parecer(df):
 
     x = "Procedimentos"
     y = "Quantidade"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Média de Dias Para Resolução do Parecer (por Procedimento)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
-    ticks = range(len(df[x]))
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(df[x], rotation=45, ha="right")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
 
     ax = edit_bar_plot(ax, title=title, xlabel=x, ylabel="Média", ylim=(0, max(df[y]) * 1.3), xticks=True, offset=0.1)
     plt.subplots_adjust(bottom=0.25)
@@ -109,12 +105,11 @@ def bar_plot_assinaturas(df):
 
     x = "Assinaturas"
     y = "Quantidade"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Quantidade de Assinatura (por Operador)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
-    ticks = range(len(df[x]))
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(df[x], rotation=45, ha="right")
+    
+    ax.set_xticklabels(ax.get_xticklabels(),  ha="right")
 
     ax = edit_bar_plot(ax, title=title, xlabel=x, ylabel=y, ylim=(0, max(df[y]) * 1.3), xticks=True, offset=50)
     plt.subplots_adjust(bottom=0.25)
@@ -127,12 +122,11 @@ def bar_plot_assinaturas_processos(df):
 
     x = "Assinaturas"
     y = "Quantidade"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Quantidade de Assinatura de Ação (por Operador)"
 
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue="Acao", errorbar=None)
-    #ticks = range(len(df[x]))
-    #ax.set_xticks(ticks)
+    ax.set_xticklabels(ax.get_xticklabels(),  ha="right")
     ax.legend(title="Ação", loc='upper left', bbox_to_anchor=(1.01, 1), borderaxespad=0)
     
     ax = edit_bar_plot(ax, title=title, xlabel="Assinaturas", ylabel="Quantidade", ylim=(0, max(df[y]) * 1.3), offset=50)
@@ -145,16 +139,14 @@ def bar_plot_assinaturas_processos_parecer(df):
 
     x = "nome_procedimento"
     y = "Quantidade"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Ranking de Solicitações de Parecer (por Procedimento)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue="Assinaturas", errorbar=None)
-    #ticks = range(len(df_plot[x]))
-    #ax.set_xticks(ticks)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45,  ha="right")
 
-    ax.legend(title="Ação", loc='upper left', bbox_to_anchor=(1.01, 1), borderaxespad=0)
+    ax.legend(title="Operadores", loc='upper left', bbox_to_anchor=(1.01, 1), borderaxespad=0)
     
-    ax = edit_bar_plot(ax, title=title, xlabel="Assinaturas", ylabel="Quantidade", ylim=(0, max(df[y]) * 1.3), offset=0.5)
+    ax = edit_bar_plot(ax, title=title, xlabel="Assinaturas", ylabel="Quantidade", ylim=(0, max(df[y]) * 1.3), offset=0.2)
     plt.subplots_adjust(bottom=0.25)
     plt.show()
     return ax
@@ -164,8 +156,9 @@ def stacked_plot_assinaturas_processos_parecer(df):
                           
     pivot_df.plot(kind="bar", stacked=True, figsize=(10,6))
     plt.xticks(rotation=45, ha="right")
-    plt.title("Procedimentos por Assinatura (empilhado)")
-    plt.ylabel("Quantidade")
+    plt.title("Procedimentos por Assinatura (empilhado)", fontsize=14, weight="bold")
+    plt.ylabel("Quantidade", fontsize=12, weight="bold")
+    plt.xlabel("Procedimentos", fontsize=12, weight="bold")
     plt.tight_layout()
     plt.show()
 
@@ -175,9 +168,9 @@ def heatmap_plot_assinaturas_processos_parecer(df):
                                         
     plt.figure(figsize=(10,6))
     sns.heatmap(pivot_df, annot=True, fmt="d", cmap="Blues")
-    plt.title("Distribuição de Procedimentos por Assinatura")
-    plt.ylabel("Procedimento")
-    plt.xlabel("Assinatura")
+    plt.title("Distribuição de Procedimentos (por Assinatura)", fontsize=14, weight="bold")
+    plt.ylabel("Procedimento", fontsize=12, weight="bold")
+    plt.xlabel("Assinatura", fontsize=12, weight="bold")
     plt.show()
 
 def bar_plot_procedimento_media_dias_cobrar_resolver_parecer(df):
@@ -185,7 +178,7 @@ def bar_plot_procedimento_media_dias_cobrar_resolver_parecer(df):
 
     x = "nome_procedimento"
     y = "quantidade_cobro"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Frequência Média de Cobrança por Procedimento (Antes do Parecer)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
     ticks = range(len(df[x]))
@@ -202,7 +195,7 @@ def bar_plot_procedimento_media_dias_cobrar_resolver_exames(df):
 
     x = "nome_procedimento"
     y = "quantidade_cobro"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Frequência Média de Cobrança por Procedimento (até Devolver o Caso)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
     ticks = range(len(df[x]))
@@ -219,14 +212,14 @@ def bar_plot_procedimento_media_dias_cobrar_resolver_exames_min5(df):
 
     x = "nome_procedimento"
     y = "quantidade_cobro"
-    title = "Média de Dias Para Resolução do Parecer por Procedimento"
+    title = "Frequência Média de Cobrança por Procedimento mais Frequentes (até Devolver o Caso)"
 
     ax = sns.barplot(data=df, x=x, y=y, palette=palette_custom, hue=x, errorbar=None)
     ticks = range(len(df[x]))
     ax.set_xticks(ticks)
     ax.set_xticklabels(df[x], rotation=45, ha="right")
 
-    ax = edit_bar_plot(ax, title=title, xlabel="Procedimentos", ylabel="Média", ylim=(0, max(df[y]) * 1.3), xticks=True, offset=0.1)
+    ax = edit_bar_plot(ax, title=title, xlabel="Procedimentos", ylabel="Média", ylim=(0, 5), xticks=True, offset=0.1)
     plt.subplots_adjust(bottom=0.30)
     plt.show()
     return ax
