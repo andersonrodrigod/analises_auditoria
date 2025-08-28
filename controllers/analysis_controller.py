@@ -36,7 +36,7 @@ def procedimentos_quantidade_total_palavra(df, palavra="COBRO"):
         dados.append([proc, qtd_total, qtd_cobro])
 
     df_final = pd.DataFrame(dados, columns=["Procedimentos", "Quantidade_Total", f"Quantidade_{palavra}"])
-    return df_final.sort_values(by=f"Quantidade_{palavra}", ascending=False).reset_index(drop=True).head(20)
+    return df_final.sort_values(by=f"Quantidade_{palavra}", ascending=False).reset_index(drop=True).head(60)
 
 def procedimento_media_dias_resolver_parecer(df, column_info="info_assistente", column_proc="nome_procedimento", top=21):
     # Passo 1: filtra registros com "PARECER"
@@ -226,4 +226,176 @@ def filter_cancelar(df,column_info="info_assistente", column_info_medico="info_m
     df_cancelar = df[filtro_coluna_info | filtro_coluna_info_medico]
 
     return df_cancelar
+
+def _ensure_date_series(s):
+    """Converte para datetime com suporte a dd/mm/yyyy HH:MM e ISO. Retorna somente a data."""
+    return pd.to_datetime(s, dayfirst=True, errors="coerce").dt.date
+
+
+def reconstruir_info(df, col_nome="nome", col_proc="nome_procedimento", col_data="data_hora_bot", col_info="info_medico"):
+    # garantir que a data esteja em formato datetime
+    df[col_data] = pd.to_datetime(df[col_data], errors="coerce")
+
+    resultados = []
+
+    # agrupa por paciente + procedimento
+    for (nome, proc), grupo in df.groupby([col_nome, col_proc]):
+        grupo = grupo.sort_values(col_data).copy()
+
+        historico = []  # vai guardar todas as infos já vistas
+
+        for _, row in grupo.iterrows():
+            partes = [p.strip() for p in row[col_info].split("-")]
+            for parte in partes:
+                if parte not in historico:  # só adiciona se for novo
+                    historico.append(parte)
+
+        # pega a última linha do grupo
+        ultima = grupo.iloc[-1].copy()
+        # substitui info_medico pelo histórico completo
+        ultima[col_info] = " - ".join(historico)
+
+        resultados.append(ultima)
+
+    # retorna dataframe consolidado
+    return pd.DataFrame(resultados)
+
+
+def filtrar_multiplos_anexar(df, col_nome="nome", col_proc="nome_procedimento", col_info="info_medico"):
+    resultados = []
+
+    # ignorar os registros cujo procedimento é "A_DEFINIR"
+    df_filtrado = df[df[col_proc].str.upper() != "PROCEDIMENTO A DEFINIR ADMINISTRATIVAMENTE"].copy()
+
+    for (nome, proc), grupo in df_filtrado.groupby([col_nome, col_proc]):
+        texto = " ".join(grupo[col_info].astype(str))
+
+        # pega só as partes que têm "ANEXAR" mas não "GUIA"
+        partes_anexar = [p for p in texto.split("-") 
+                         if "ANEXAR" in p.upper() and "GUIA" not in p.upper()]
+
+        # extrai datas (formato dd/mm) dessas partes
+        datas = set()
+        for parte in partes_anexar:
+            match = re.search(r"\b\d{2}/\d{2}\b", parte)
+            if match:
+                datas.add(match.group())
+
+        # se tiver 2 ou mais datas diferentes com ANEXAR, guarda
+        if len(datas) >= 2:
+            resultados.append({
+                "nome": nome,
+                "nome_procedimento": proc
+            })
+
+    return pd.DataFrame(resultados)
+
+
+def filtrar_anexar_parecer(df, col_nome="nome", col_proc="nome_procedimento", col_info="info_medico"):
+    resultados = []
+
+    df_filtrado = df[df[col_proc].str.upper() != "PROCEDIMENTO A DEFINIR ADMINISTRATIVAMENTE"].copy()
+
+    for (nome, proc), grupo in df_filtrado.groupby([col_nome, col_proc]):
+        texto = " ".join(grupo[col_info].astype(str)).upper()
+
+        partes_anexar = [p for p in texto.split("-") if "ANEXAR" in p and "GUIA" not in p]
+        partes_parecer = [p for p in texto.split("-") if "PARECER" in p]
+
+        datas_anexar = set(re.findall(r"\b\d{2}/\d{2}\b", " ".join(partes_anexar)))
+        datas_parecer = set(re.findall(r"\b\d{2}/\d{2}\b", " ".join(partes_parecer)))
+
+        if datas_anexar and datas_parecer:
+            resultados.append({
+                "nome": nome,
+                "nome_procedimento": proc
+            })
+
+    df_result = pd.DataFrame(resultados)
+
+    # Remove completamente linhas vazias ou só espaços
+    df_result["nome_procedimento"] = df_result["nome_procedimento"].astype(str).str.strip()
+    df_result = df_result[df_result["nome_procedimento"] != ""]
+    
+
+    # Ordenar do mais frequente para o menos frequente
+    df_result = df_result.groupby(["nome", "nome_procedimento"]).size().reset_index(name="quantidade")
+    df_result = df_result.sort_values(by="quantidade", ascending=False).reset_index(drop=True)
+
+    return df_result
+
+def resumo_procedimentos(df, coluna_proc="nome_procedimento", coluna_info="info_medico", palavra_parecer="PARECER", top=20):
+    """
+    Retorna um DataFrame com:
+    - Quantidade total de cada procedimento
+    - Quantidade de procedimentos com 'PARECER'
+    """
+
+    # Limpa procedimentos vazios ou só espaços
+    df_proc = df.copy()
+    df_proc[coluna_proc] = df_proc[coluna_proc].astype(str).str.strip()
+    df_proc = df_proc[df_proc[coluna_proc] != ""]
+
+    # Contagem total de procedimentos
+    total_proc = Counter(df_proc[coluna_proc])
+
+    # Contagem de procedimentos que contêm a palavra "PARECER"
+    df_parecer = df_proc[df_proc[coluna_info].str.contains(palavra_parecer, case=False, na=False)]
+    parecer_proc = Counter(df_parecer[coluna_proc])
+
+    # Monta lista final
+    dados = []
+    for proc, qtd_total in total_proc.items():
+        qtd_parecer = parecer_proc.get(proc, 0)
+        dados.append([proc, qtd_total, qtd_parecer])
+
+    # Cria DataFrame
+    df_final = pd.DataFrame(dados, columns=["Procedimento", "Quantidade_Total", f"Quantidade_{palavra_parecer}"])
+
+    # Ordena pelo mais frequente de PARECER primeiro
+    df_final = df_final.sort_values(by=f"Quantidade_{palavra_parecer}", ascending=False).reset_index(drop=True)
+
+    return df_final.head(top)
+
+def filtrar_multiplos_acoes(df, col_nome="nome", col_proc="nome_procedimento", col_info="info_medico"):
+    """
+    Filtra registros em que aparecem múltiplas datas em ações específicas
+    como ANEXAR, REALIZOU, CHECAR, VERIFICAR, TROCAR.
+    """
+    resultados = []
+
+    # Ignorar registros cujo procedimento é "A_DEFINIR"
+    df_filtrado = df[df[col_proc].str.upper() != "PROCEDIMENTO A DEFINIR ADMINISTRATIVAMENTE"].copy()
+
+    acoes = ["ANEXAR", "REALIZOU", "CHECAR", "VERIFICAR", "TROCAR", "PARECER"]
+
+    for (nome, proc), grupo in df_filtrado.groupby([col_nome, col_proc]):
+        texto = " ".join(grupo[col_info].astype(str)).upper()
+
+        for acao in acoes:
+            # pega partes que têm a ação e não "GUIA" (apenas para ANEXAR)
+            if acao == "ANEXAR":
+                partes = [p for p in texto.split("-") if acao in p and "GUIA" not in p]
+            else:
+                partes = [p for p in texto.split("-") if acao in p]
+
+            # extrai datas (dd/mm) dessas partes
+            datas = set(re.findall(r"\b\d{2}/\d{2}\b", " ".join(partes)))
+
+            if len(datas) >= 2:
+                resultados.append({
+                    "nome": nome,
+                    "nome_procedimento": proc,
+                    "acao": acao,
+                    "datas": sorted(datas)
+                })
+
+    return pd.DataFrame(resultados)
+
+
+
+
+# exemplo de uso:
+
+
 
